@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.Configure<CustomerService>(builder.Configuration.GetSection("CdpDatabase"));
 builder.Services.AddSingleton<CustomerService>();
+builder.Services.AddSingleton<AddressService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

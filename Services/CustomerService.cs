@@ -19,9 +19,10 @@ namespace CustomerDataPlatform.Services
             return await _customers.Find(_ => true).ToListAsync();
         }
 
-        public async Task<Customer?> GetAsync(string id)
+        public async Task<Customer> GetAsync(string id)
         {
-            return await _customers.Find(x => x.Id == id).FirstOrDefaultAsync();
+            var customer = await _customers.Find(x => x.Id == id).FirstOrDefaultAsync();
+            return customer;
         }
 
         public async Task CreateAsync(Customer newCustomer)
@@ -29,14 +30,28 @@ namespace CustomerDataPlatform.Services
             await _customers.InsertOneAsync(newCustomer);
         }
 
-        public async Task UpdateAsync(string id, Customer updatedCustomer)
+        public async Task AddAddressAsync(string id, Address address)
         {
-            await _customers.ReplaceOneAsync(x => x.Id == id, updatedCustomer);
+            var filter = Builders<Customer>.Filter.Eq(x => x.Id, id);
+            var update = Builders<Customer>.Update.Push(x => x.AddressList, address);
+            await _customers.UpdateOneAsync(filter, update);
         }
 
-        public async Task RemoveAsync(string id)
+        public async Task AddServiceAsync(string customerId, string addressId, Service service)
         {
-            await _customers.DeleteOneAsync(x => x.Id == id);
+            var filter = Builders<Customer>.Filter.And(
+                Builders<Customer>.Filter.Eq(x => x.Id, customerId),
+                Builders<Customer>.Filter.ElemMatch(x => x.AddressList, a => a.Id == addressId)
+            );
+            var update = Builders<Customer>.Update.Push("AddressList.$.ServiceList", service);
+            await _customers.UpdateOneAsync(filter, update);
+        }
+
+        public async Task DeleteAddress(string customerId, string addressId)
+        {
+            var filter = Builders<Customer>.Filter.Eq(x => x.Id, customerId);
+            var update = Builders<Customer>.Update.PullFilter(customer=>customer.AddressList,addressEntry => addressEntry.Id == addressId);
+            await _customers.UpdateManyAsync(filter, update);
         }
     }
 }
