@@ -67,29 +67,62 @@ namespace CustomerDataPlatform.Controllers
         [HttpPost("service")]
         public async Task<ActionResult<Customer>> AddService(NewServiceDto request)
         {
-            var existingCustomer = await _customerService.GetAsync(request.CustomerId);
-            if (existingCustomer is null)
+            try
             {
-                return NotFound();
+                Service newService = new Service
+                {
+                    Id = ObjectId.GenerateNewId().ToString(),
+                    Keluhan = request.Keluhan,
+                    Tindakan = request.Tindakan,
+                    Hasil = request.Hasil,
+                    ServiceDate = DateOnly.FromDateTime(DateTime.UtcNow)
+                };
+                await _customerService.AddServiceAsync(request.AddressId, newService);
+                return Ok(newService);
             }
-            var existingAddress = existingCustomer.AddressList.FirstOrDefault(x => x.Id == request.AddressId);
-            if (existingAddress is null)
+            catch (Exception ex)
             {
-                return NotFound();
+                return BadRequest(ex.Message);
             }
-            Service newService = new Service
-            {
-                Id = ObjectId.GenerateNewId().ToString(),
-                Keluhan = request.Keluhan,
-                Tindakan = request.Tindakan,
-                Hasil = request.Hasil,
-                ServiceDate = DateOnly.FromDateTime(DateTime.UtcNow)
-            };
-            await _customerService.AddServiceAsync(request.CustomerId, request.AddressId, newService);
-            return CreatedAtAction(nameof(GetAllCustomer), new { id = request.CustomerId }, existingCustomer);
+
         }
 
+        [HttpDelete("customer/{id}")]
+        public async Task<IActionResult> DeleteCustomer(string id)
+        {
+            var customer = await _customerService.GetAsync(id);
+            if (customer is null)
+            {
+                return NotFound();
+            }
+            await _customerService.DeleteCustomer(id);
+            return NoContent();
+        }
 
+        [HttpDelete("address")]
+        public async Task<IActionResult> DeleteAddress(DeleteAddressDto request)
+        {
+            //var customer = await _customerService.GetAsync(customerId);
+            //if (customer is null)
+            //{
+            //    return NotFound();
+            //}
+            //var address = customer.AddressList.FirstOrDefault(x => x.Id == id);
+            //if (address is null)
+            //{
+            //    return NotFound();
+            //}
+            await _customerService.DeleteAddress(request.customerId, request.addressId);
+            return NoContent();
+        }
+
+        [HttpDelete("service/{id}")]
+        public async Task<IActionResult> DeleteService(string id)
+        {
+  
+            await _customerService.DeleteService(id);
+            return NoContent();
+        }
 
 
     }
