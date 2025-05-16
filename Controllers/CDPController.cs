@@ -3,6 +3,7 @@ using CustomerDataPlatform.Models;
 using CustomerDataPlatform.Services;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
+using ZstdSharp.Unsafe;
 
 namespace CustomerDataPlatform.Controllers
 {
@@ -22,6 +23,7 @@ namespace CustomerDataPlatform.Controllers
         [HttpPost("customer")]
         public async Task<IActionResult> AddNewCustomer(NewCustomerDto request)
         {
+            //if(string.IsNullOrEmpty(request.Name)||string.IsNullOrEmpty(request.PhoneNumber))return BadRequest("Name and PhoneNumber cannot be empty");
             Customer newCustomer = new Customer
             {
                 Id = ObjectId.GenerateNewId().ToString(),
@@ -45,6 +47,30 @@ namespace CustomerDataPlatform.Controllers
             return Ok(customer);
         }
 
+        [HttpPut("customer/{id}")]
+        public async Task<IActionResult> UpdateCustomer(string id, UpdateCustomerDto request)
+        {
+            var customer = await _customerService.GetAsync(id);
+            if (customer is null)
+            {
+                return NotFound();
+            }
+            await _customerService.UpdateCustomer(id,request);
+            return NoContent();
+        }
+
+        [HttpDelete("customer/{id}")]
+        public async Task<IActionResult> DeleteCustomer(string id)
+        {
+            var customer = await _customerService.GetAsync(id);
+            if (customer is null)
+            {
+                return NotFound();
+            }
+            await _customerService.DeleteCustomer(id);
+            return NoContent();
+        }
+
         [HttpPost("address")]
         public async Task<ActionResult<Customer>> AddAddress(NewAddressDto request)
         {
@@ -59,10 +85,35 @@ namespace CustomerDataPlatform.Controllers
                 Alamat = request.Alamat,
                 Kategori = request.Kategori,
                 CreatedAt = DateTime.UtcNow,
-            };  
+            };
             await _customerService.AddAddressAsync(request.CustomerId, newAddress);
             return CreatedAtAction(nameof(GetAllCustomer), new { id = request.CustomerId }, existingCustomer);
         }
+
+        [HttpPut("address/{id}")]
+        public async Task<IActionResult> UpdateAddress(string id, UpdateAddressDto request)
+        {
+            await _customerService.UpdateAddress(id, request);
+            return Ok();
+        }
+
+        [HttpDelete("address/{id}")]
+        public async Task<IActionResult> DeleteAddress(string id)
+        {
+            try
+            {
+                await _customerService.DeleteAddress(id);
+                return NoContent();
+            }
+            catch (Exception)
+            {
+                return BadRequest("Address not found");
+                //throw;
+            }
+
+        }
+
+
 
         [HttpPost("service")]
         public async Task<ActionResult<Customer>> AddService(NewServiceDto request)
@@ -87,41 +138,34 @@ namespace CustomerDataPlatform.Controllers
 
         }
 
-        [HttpDelete("customer/{id}")]
-        public async Task<IActionResult> DeleteCustomer(string id)
+        [HttpPut("service/{id}")]
+        public async Task<IActionResult> UpdateService(string id, UpdateServiceDto request)
         {
-            var customer = await _customerService.GetAsync(id);
-            if (customer is null)
+            try
             {
-                return NotFound();
-            }
-            await _customerService.DeleteCustomer(id);
-            return NoContent();
-        }
+                await _customerService.UpdateService(id, request);
+                return NoContent();
 
-        [HttpDelete("address")]
-        public async Task<IActionResult> DeleteAddress(DeleteAddressDto request)
-        {
-            //var customer = await _customerService.GetAsync(customerId);
-            //if (customer is null)
-            //{
-            //    return NotFound();
-            //}
-            //var address = customer.AddressList.FirstOrDefault(x => x.Id == id);
-            //if (address is null)
-            //{
-            //    return NotFound();
-            //}
-            await _customerService.DeleteAddress(request.customerId, request.addressId);
-            return NoContent();
+            }
+            catch (Exception)
+            {
+                return BadRequest("cant update service");
+            }
         }
 
         [HttpDelete("service/{id}")]
         public async Task<IActionResult> DeleteService(string id)
         {
-  
-            await _customerService.DeleteService(id);
-            return NoContent();
+            try
+            {
+                await _customerService.DeleteService(id);
+                return NoContent();
+            }
+            catch (Exception)
+            {
+                return BadRequest("Service not found");
+            }
+            
         }
 
 

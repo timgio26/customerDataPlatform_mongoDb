@@ -2,7 +2,7 @@
 {
     public class NewCustomerDto
     {
-        public string Name { get; set; } = string.Empty;
-        public string PhoneNumber { get; set; } = string.Empty;
+        public required string Name { get; set; } = string.Empty;
+        public required string PhoneNumber { get; set; } = string.Empty;
     }
 }
