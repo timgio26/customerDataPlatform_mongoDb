@@ -17,7 +17,15 @@ namespace CustomerDataPlatform.Services
 
         public async Task<List<Customer>> GetAsync()
         {
-            return await _customers.Find(_ => true).ToListAsync();
+            var projection = Builders<Customer>.Projection
+                .Exclude(c => c.AddressList.Select(a => a.ServiceList));
+                //.Include(c => c.AddressList.Select(a=>a.Alamat))
+                //.Include(c => c.Id)
+                //.Include(c => c.Name)
+                //.Include(c => c.PhoneNumber)
+                //.Include(c => c.CreatedAt);
+
+            return await _customers.Find(_ => true).Project<Customer>(projection).ToListAsync();
         }
 
         public async Task<Customer> GetAsync(string id)
