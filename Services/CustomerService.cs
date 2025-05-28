@@ -10,7 +10,9 @@ namespace CustomerDataPlatform.Services
 
         public CustomerService(IConfiguration config)
         {
-            var client = new MongoClient(config["CdpDatabase:ConnectionString"]);
+            //var client = new MongoClient(config["CdpDatabase:ConnectionString"]);
+            //var client = new MongoClient(connectionString: Environment.GetEnvironmentVariable("DB_CONNECTION"));
+            var client = new MongoClient(config["DB_CONNECTION"]);
             var database = client.GetDatabase(config["CdpDatabase:DatabaseName"]);
             _customers = database.GetCollection<Customer>("customer");
         }

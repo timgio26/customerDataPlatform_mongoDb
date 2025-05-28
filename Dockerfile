@@ -10,7 +10,7 @@ RUN dotnet restore
 # Copy the full source code and build the application
 COPY . . 
 RUN dotnet publish -c Release -o /publish
-# RUN dotnet publish -o out
+# RUN dotnet publish
 
 # Use a lightweight .NET runtime for production
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS runtime
@@ -27,4 +27,3 @@ EXPOSE 8080
 
 # # Entry point to start the API
 CMD ["dotnet", "CustomerDataPlatform.dll"]
-# CMD ["dotnet", "run"]

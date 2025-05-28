@@ -6,7 +6,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.Configure<CustomerService>(builder.Configuration.GetSection("CdpDatabase"));
 builder.Services.AddSingleton<CustomerService>();
-//builder.Services.AddSingleton<AddressService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -18,7 +17,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("CorsPolicy",
                       policyBuilder =>
                       {
-                          policyBuilder.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173");
+                          policyBuilder.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173","http://localhost:3000");
                       });
 });
 
