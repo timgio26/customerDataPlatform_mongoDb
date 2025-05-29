@@ -3,6 +3,7 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+System.Console.WriteLine(Environment.GetEnvironmentVariable("DB_CONNECTION"));
 // Add services to the container.
 builder.Services.Configure<CustomerService>(builder.Configuration.GetSection("CdpDatabase"));
 builder.Services.AddSingleton<CustomerService>();
